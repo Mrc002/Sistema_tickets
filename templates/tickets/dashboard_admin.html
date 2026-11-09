@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard Admin{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h3 class="mb-0">Panel de administración</h3>
+    <a class="btn btn-outline-primary" href="{% url 'exportar_tickets' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}">
+        <i class="bi bi-filetype-csv"></i> Exportar CSV
+    </a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card stat-card p-3">
+            <div class="text-secondary small">Total</div>
+            <div class="fs-3 fw-bold">{{ total }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card stat-card p-3">
+            <div class="text-secondary small">Nuevos</div>
+            <div class="fs-3 fw-bold text-primary">{{ nuevos }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card stat-card p-3">
+            <div class="text-secondary small">En proceso</div>
+            <div class="fs-3 fw-bold text-warning">{{ en_proceso }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card stat-card p-3">
+            <div class="text-secondary small">Cerrados</div>
+            <div class="fs-3 fw-bold text-secondary">{{ cerrados }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card stat-card mb-4">
+    <div class="card-header bg-white fw-semibold">Tickets sin asignar</div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr><th>#</th><th>Título</th><th>Prioridad</th><th>Estado</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for t in sin_asignar %}
+                <tr>
+                    <td>TKT-{{ t.id|stringformat:"03d" }}</td>
+                    <td><a href="{% url 'detalle_ticket' t.id %}">{{ t.titulo }}</a></td>
+                    <td>
+                        {{ t.get_prioridad_display }}
+                        {% if t.esta_vencido %}<span class="sla-vencido small">· SLA vencido</span>{% endif %}
+                    </td>
+                    <td>{% include 'partials/badge_estado.html' with ticket=t %}</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary" href="{% url 'asignar_ticket' t.id %}">
+                            <i class="bi bi-person-plus"></i> Asignar
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center text-secondary py-3">Sin tickets pendientes de asignar.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% include 'partials/filtros.html' %}
+
+<div class="card stat-card">
+    <div class="card-header bg-white fw-semibold">Todos los tickets</div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr><th>#</th><th>Título</th><th>Cliente</th><th>Agente</th><th>Categoría</th><th>Prioridad</th><th>Estado</th><th>SLA</th></tr>
+            </thead>
+            <tbody>
+                {% for t in page_obj %}
+                <tr>
+                    <td>TKT-{{ t.id|stringformat:"03d" }}</td>
+                    <td><a href="{% url 'detalle_ticket' t.id %}">{{ t.titulo }}</a></td>
+                    <td>{{ t.cliente }}</td>
+                    <td>{{ t.agente|default:"—" }}</td>
+                    <td>{{ t.get_categoria_display }}</td>
+                    <td>{{ t.get_prioridad_display }}</td>
+                    <td>{% include 'partials/badge_estado.html' with ticket=t %}</td>
+                    <td>
+                        {% if t.esta_vencido %}
+                            <span class="sla-vencido small">Vencido</span>
+                        {% elif t.esta_abierto %}
+                            <span class="text-secondary small">{{ t.fecha_vencimiento|date:"d/m H:i" }}</span>
+                        {% else %}
+                            <span class="text-secondary small">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="text-center text-secondary py-3">No hay tickets que coincidan con el filtro.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="card-body pt-0">
+        {% include 'partials/paginacion.html' %}
+    </div>
+</div>
+{% endblock %}

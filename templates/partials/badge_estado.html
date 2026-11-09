@@ -1,0 +1,2 @@
+{% load tickets_extras %}
+<span class="badge badge-estado badge-{{ ticket.estado|slugify_estado }}">{{ ticket.get_estado_display }}</span>

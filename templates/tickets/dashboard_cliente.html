@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Mis tickets{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h3 class="mb-0">Mis tickets</h3>
+    <a href="{% url 'crear_ticket' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nuevo ticket
+    </a>
+</div>
+
+{% include 'partials/filtros.html' %}
+
+<div class="card stat-card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr><th>#</th><th>Título</th><th>Categoría</th><th>Prioridad</th><th>Estado</th><th>Creado</th><th>SLA</th></tr>
+            </thead>
+            <tbody>
+                {% for t in page_obj %}
+                <tr>
+                    <td>TKT-{{ t.id|stringformat:"03d" }}</td>
+                    <td><a href="{% url 'detalle_ticket' t.id %}">{{ t.titulo }}</a></td>
+                    <td>{{ t.get_categoria_display }}</td>
+                    <td>{{ t.get_prioridad_display }}</td>
+                    <td>{% include 'partials/badge_estado.html' with ticket=t %}</td>
+                    <td>{{ t.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        {% if t.esta_vencido %}
+                            <span class="sla-vencido small">Vencido</span>
+                        {% elif t.esta_abierto %}
+                            <span class="text-secondary small">{{ t.fecha_vencimiento|date:"d/m H:i" }}</span>
+                        {% else %}
+                            <span class="text-secondary small">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-secondary py-4">
+                    Aún no has creado tickets. <a href="{% url 'crear_ticket' %}">Crea el primero</a>.
+                </td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="card-body pt-0">
+        {% include 'partials/paginacion.html' %}
+    </div>
+</div>
+{% endblock %}

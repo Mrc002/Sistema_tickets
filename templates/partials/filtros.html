@@ -1,0 +1,20 @@
+{% if filtro_form %}
+<div class="card stat-card mb-4">
+    <form method="get" class="card-body">
+        <div class="row g-2 align-items-end">
+            {% for field in filtro_form %}
+                <div class="col-6 col-md-4 col-lg-2">
+                    <label class="form-label small mb-1" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+            {% endfor %}
+            <div class="col-12 col-lg-auto d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-funnel"></i> Filtrar
+                </button>
+                <a href="{{ request.path }}" class="btn btn-outline-secondary">Limpiar</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endif %}
